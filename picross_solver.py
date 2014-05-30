@@ -2,6 +2,8 @@
 #in the nonogram list, "-" represents undetermined spaces, " " represents confirmed blank spaces, and "O" represents confirmed blocks.  This means that, when comparing "isolation" solutions to the present row, it is acceptable for a mismatch to contain a "-"; it's the " "-"O" or vice-versa pairs that invalidate the solution
 #also, solutions do not contain "-"'s, so check through the row/column proper to screen out "O"-" " mismatch solutions
 
+from copy import deepcopy
+
 #data type validation method
 def validate(typ,msg):
 	var=input(msg)
@@ -60,22 +62,44 @@ def combine(lst):
 def solset(num,l):
 	if len(num)==0:
 		return [[" " for n in range(l)]]
-	groups=group(num,l)
 	sol=[]
+	groups=group(num,l)
 	blanks=l-sum(num)-len(num)+1
+	s=[[" "]*blanks]+groups
+	sol.append(s)
 	for n in range(len(groups)):
-		print(groups)#debug
-		print(len(groups))#debug
 		for m in range(blanks):
-			s=groups#for reasons beyond me, "groups" seems to change with s
-			print(s)#debug
-			print(groups)#debug
-			s[n]=[" " for x in range(blanks-m)]+s[n]+[" " for x in range(m)]
-			s=combine(s)
+			s=deepcopy(sol[-1])
+			del s[n][-1]
+			s[n+1].append(" ")
 			sol.append(s)
+	for x in range(len(sol)):
+		sol[x]=combine(sol[x])
 	return sol
 
-print(solset([1,2],5))#debug
+#filters the solution set of solutions that are shown to be wrong
+def fil(sol,o):
+	n=0
+	while n<len(sol):
+		for m in range(len(o)):
+			if o[m]!="-" and o[m]!=sol[n][m]:
+				del sol[n]
+				n=n-1
+		n=n+1
+	return sol
+
+#goes through a list of possible solutions to create a single list to be applied
+def absol(sol):
+	ret=sol[0]
+	for n in sol[1:]:
+		for m in range(len(n)):
+			if ret[m]!=n[m]:
+				ret[m]="-"
+	return ret
+
+x=solset([2],5)#debug
+y=(fil(x,["-","O","-","-","-"]))#debug
+print(absol(y))#debug
 
 #get dimensions
 r=0
