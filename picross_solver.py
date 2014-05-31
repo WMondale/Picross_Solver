@@ -58,8 +58,15 @@ def combine(lst):
 		ret=ret+n
 	return ret
 
+#removes an element from the end of a designated sublist and appends it to the end of the next sublist
+def mover(sol,e):
+	h=sol[e][-1]
+	del sol[e][-1]
+	sol[e+1].append(h)
+	return sol
+
 #generates a set of solutions for a number list and length
-def solset(num,l):
+def solset(num,l,o):
 	if len(num)==0:
 		return [[" " for n in range(l)]]
 	sol=[]
@@ -67,26 +74,37 @@ def solset(num,l):
 	blanks=l-sum(num)-len(num)+1
 	s=[[" "]*blanks]+groups
 	sol.append(s)
-	for n in range(len(groups)):
-		for m in range(blanks):
-			s=deepcopy(sol[-1])
-			del s[n][-1]
-			s[n+1].append(" ")
-			sol.append(s)
-	for x in range(len(sol)):
-		sol[x]=combine(sol[x])
-	return sol
+	ret=[]
+	if fil(deepcopy(combine(sol[0])),o):
+		ret.append(deepcopy(combine(sol[0])))
+	cop=[]
+	for n in range(blanks):
+		s=deepcopy(sol)
+		sol=[]
+		for m in s:
+			if len(m[0])==0:
+				break
+			for p in range(0,len(m)-1):
+				m=mover(m,p)
+				sol.append(deepcopy(m))
+		cop=deepcopy(sol)
+		for x in range(len(cop)):
+			cop[x]=combine(cop[x])
+			if fil(cop[x],o):
+				ret.append(cop[x])
+	return ret
+			
 
-#filters the solution set of solutions that are shown to be wrong
-def fil(sol,o):
-	n=0
-	while n<len(sol):
-		for m in range(len(o)):
-			if o[m]!="-" and o[m]!=sol[n][m]:
-				del sol[n]
-				n=n-1
-		n=n+1
-	return sol
+
+#filters the solution set of solutions that are known to be wrong
+def fil(n,o):
+	ret=True
+	for m in range(len(o)):
+		if o[m]!="-" and o[m]!=n[m]:
+			ret=False
+			break
+	return ret
+			
 
 #goes through a list of possible solutions to create a single list to be applied
 def absol(sol):
@@ -96,10 +114,6 @@ def absol(sol):
 			if ret[m]!=n[m]:
 				ret[m]="-"
 	return ret
-
-x=solset([2],5)#debug
-y=(fil(x,["-","O","-","-","-"]))#debug
-print(absol(y))#debug
 
 #get dimensions
 r=0
@@ -118,3 +132,32 @@ print("Input number lists for rows; 0 ends and advances to next list.\n")
 rows=rnc(c,r,"Row ")
 print("Input number lists for columns; 0 ends and advances to next list.\n")
 columns=rnc(r,c,"Column ")
+
+#run until no changes to rows or columns have been made
+change=True
+while change:
+	for n in range(len(rows)):
+		change=False
+		m=solset(rows[n],r,nonogram[n])
+		m=absol(m)
+		print("Loading.")
+		if m!=nonogram[n]:
+			print("Loading..")
+			nonogram[n]=m
+			print("Loading...")
+			change=True
+
+	for n in range(len(columns)):
+		m=solset(columns[n],c,[nonogram[x][n] for x in range(c)])
+		m=absol(m)
+		print("Loading.")
+		if m!=[nonogram[x][n] for x in range(c)]:
+			print("Loading..")
+			col(nonogram,m,n)
+			print("Loading...")
+			change=True
+
+#print what has been solved
+print("The Solution:")
+for n in nonogram:
+	print(n)
