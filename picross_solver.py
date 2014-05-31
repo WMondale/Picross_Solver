@@ -87,6 +87,7 @@ def solset(num,l,o):
 			for p in range(0,len(m)-1):
 				m=mover(m,p)
 				sol.append(deepcopy(m))
+		sol=nore(sol)
 		cop=deepcopy(sol)
 		for x in range(len(cop)):
 			cop[x]=combine(cop[x])
@@ -94,7 +95,6 @@ def solset(num,l,o):
 				ret.append(cop[x])
 	return ret
 			
-
 
 #filters the solution set of solutions that are known to be wrong
 def fil(n,o):
@@ -105,6 +105,20 @@ def fil(n,o):
 			break
 	return ret
 			
+#eliminates repeats in a list
+def nore(lst):
+	ret=[]
+	n=0
+	while n<len(lst):
+		ret.append(lst[n])
+		m=n+1
+		while m<len(lst):
+			if ret[-1]==lst[m]:
+				del lst[m]
+			else:
+				m=m+1
+		n=n+1
+	return ret
 
 #goes through a list of possible solutions to create a single list to be applied
 def absol(sol):
