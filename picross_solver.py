@@ -121,7 +121,11 @@ def nore(lst):
 	return ret
 
 #goes through a list of possible solutions to create a single list to be applied
-def absol(sol):
+def absol(sol,n,w,l):
+	if len(sol)==0 and w=="r":
+		return nonogram[n]
+	if len(sol)==0 and w=="c":
+		return [nonogram[x][n] for x in range(l)]
 	ret=sol[0]
 	for n in sol[1:]:
 		for m in range(len(n)):
@@ -153,7 +157,7 @@ while change:
 	for n in range(len(rows)):
 		change=False
 		m=solset(rows[n],r,nonogram[n])
-		m=absol(m)
+		m=absol(m,n,"r",r)
 		print("Loading.")
 		if m!=nonogram[n]:
 			print("Loading..")
@@ -163,7 +167,7 @@ while change:
 
 	for n in range(len(columns)):
 		m=solset(columns[n],c,[nonogram[x][n] for x in range(c)])
-		m=absol(m)
+		m=absol(m,n,"c",c)
 		print("Loading.")
 		if m!=[nonogram[x][n] for x in range(c)]:
 			print("Loading..")
@@ -173,5 +177,7 @@ while change:
 
 #print what has been solved
 print("The Solution:")
+x=0
 for n in nonogram:
-	print(n)
+	x=x+1
+	print(x,n)
